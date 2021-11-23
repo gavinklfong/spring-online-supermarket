@@ -1,0 +1,17 @@
+logging:
+  level:
+    root: TRACE
+    space:
+      gavinklfong: DEBUG
+
+debug: true
+
+spring:
+  elasticsearch:
+    rest:
+      uris: http://localhost:9200
+  data:
+    elasticsearch:
+      client:
+        reactive:
+          endpoints: http://localhost:9200

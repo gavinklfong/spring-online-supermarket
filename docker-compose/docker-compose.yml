@@ -1,0 +1,25 @@
+services:
+  elasticsearch:
+    image: elasticsearch:7.14.2
+    ports:
+      - "9200:9200"
+    environment:
+      discovery.type: single-node
+    volumes:
+      - ./elasticsearch-data:/usr/share/elasticsearch/data
+#  kibana:
+#    depends_on:
+#      - elasticsearch
+#    image: docker.elastic.co/kibana/kibana:7.14.2
+#    ports:
+#      - "5601:5601"
+#    environment:
+#      SERVER_NAME: kibana
+#      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+#  logstash:
+#     depends_on:
+#       - elasticsearch
+#     image: docker.elastic.co/logstash/logstash:7.14.2
+#     volumes:
+#       - ./logstash-pipeline:/usr/share/logstash/pipeline
+#       - ./logstash-data/products.json:/usr/share/logstash/data/products.json
