@@ -16,13 +16,13 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepo;
 
-    @GetMapping("/query")
-    public Flux<Product> findByStringQuery(@RequestParam String query, @RequestParam Integer pageNumber) {
-        return productRepo.findByStringQuery(query);
-    }
+//    @GetMapping("/query")
+//    public Flux<Product> findByStringQuery(@RequestParam String query, @RequestParam Integer pageNumber) {
+//        return productRepo.findByStringQuery(query);
+//    }
 
     @GetMapping("/category")
     public Flux<Product> findProductsByCategory(@RequestParam String category, @RequestParam Integer pageNumber) {
-        return productRepo.findByCategory(category);
+        return productRepo.findByCategoryStartingWith(category);
     }
 }
