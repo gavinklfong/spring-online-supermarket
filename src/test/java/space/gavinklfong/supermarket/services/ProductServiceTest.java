@@ -3,15 +3,13 @@ package space.gavinklfong.supermarket.services;
 import com.github.javafaker.Faker;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
@@ -20,13 +18,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import space.gavinklfong.supermarket.models.Product;
-import space.gavinklfong.supermarket.repositories.ProductRepository;
 
-import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,11 +40,11 @@ public class ProductServiceTest {
 
     @DynamicPropertySource
     static void dataSourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.elasticsearch.client.reactive.endpoints", () -> String.format("%s:%d",container.getContainerIpAddress(), container.getMappedPort(9200)));
+        registry.add("spring.data.elasticsearch.client.reactive.endpoints", () -> String.format("%s:%d", container.getContainerIpAddress(), container.getMappedPort(9200)));
 //        registry.add("spring.data.elasticsearch.client.reactive.endpoints", () -> "localhost:9200");
     }
 
-    private static final String PRODUCT_DEFAULT_NAME = "Default Product Name";
+    private static final String DEFAULT_PRODUCT_NAME = "Default Product Name";
     private static final String DEFAULT_PRODUCT_CATEGORY = "Default Category";
     private static final String PRODUCT_CATEGORY_1 = "Category 1";
     private static final String PRODUCT_CATEGORY_1_1 = "Category 1/Sub Category 1";
@@ -71,70 +69,189 @@ public class ProductServiceTest {
         } catch (Exception e) {
             log.warn("fail to delete index");
         }
-
-//        Query query = new NativeSearchQueryBuilder()
-//                .withQuery(QueryBuilders.matchAllQuery()).build();
-//        elasticsearchOperations.delete(query).block();
     }
-//
-//    @Test
-//    void addProduct() {
-//        Product savedProduct = addProduct(PRODUCT_DEFAULT_NAME, DEFAULT_PRODUCT_CATEGORY);
-//        assertNotNull(savedProduct);
-//        log.info("saved product: {}", savedProduct);
-//    }
-//
-//    @Test
-//    void givenProductExists_whenFindById_thenProductIsFound() {
-//        Product savedProduct = addProduct(PRODUCT_DEFAULT_NAME, DEFAULT_PRODUCT_CATEGORY);
-//        addProducts(5);
-//
-//        Mono<Product> retrievedProduct = productService.findById(savedProduct.getId());
-//
-//        Product result = retrievedProduct.block();
-//        assertEquals(savedProduct, result);
-//    }
+
+    @Test
+    void addProduct() {
+        Product savedProduct = addProduct(DEFAULT_PRODUCT_NAME, DEFAULT_PRODUCT_CATEGORY);
+        assertNotNull(savedProduct);
+        log.info("saved product: {}", savedProduct);
+    }
+
+    @Test
+    void givenProductExists_whenFindById_thenProductIsFound() {
+        Product savedProduct = addProduct(DEFAULT_PRODUCT_NAME, DEFAULT_PRODUCT_CATEGORY);
+        addProducts(5);
+
+        Mono<Product> retrievedProduct = productService.findById(savedProduct.getId());
+
+        Product result = retrievedProduct.block();
+        assertEquals(savedProduct, result);
+    }
 
     @Test
     void givenProductsExist_whenFindByCategory_thenProductCountIsTheSame() {
-        List<Product> existingProducts =addProducts(3);
+        List<Product> existingProducts = addProducts(3);
         addProducts(1, PRODUCT_CATEGORY_1);
         addProducts(1, PRODUCT_CATEGORY_2);
 
-        Flux<Product> products = productService.findByCategory(DEFAULT_PRODUCT_CATEGORY);
+        Flux<Product> products = productService.findByCategory(DEFAULT_PRODUCT_CATEGORY, 0, 50);
 
         List<Product> result = products.collectList().block();
-//        assertThat(result).hasSize(existingProducts.size()).hasSameElementsAs(existingProducts);
-        for (Product product : result) {
-            log.info("retrieved products: {}", product);
+        assertThat(result).hasSize(existingProducts.size()).hasSameElementsAs(existingProducts);
+    }
+
+    @Test
+    void givenProductsExist_whenFindByCategoryWithAscSortingByPrice_thenResultWithCorrectOrder() {
+        // GIVEN
+        // other products
+        addProducts(1, PRODUCT_CATEGORY_1);
+        addProducts(1, PRODUCT_CATEGORY_2);
+
+        // products of the target category
+        List<Product> existingProducts = asList(
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 3D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 2D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 1.5D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 1.25D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 1D)
+        );
+
+        List<Product> expectedProducts = existingProducts.stream().sorted(Comparator.comparingDouble(Product::getPrice)).collect(toList());
+
+        // WHEN
+        Flux<Product> output = productService.findByCategory(DEFAULT_PRODUCT_CATEGORY, "price", Sort.Direction.ASC, 0, 50);
+
+        // THEN
+        List<Product> outputList = output.collectList().block();
+        assertThat(outputList.equals(expectedProducts)).isTrue();
+        for (Product product : outputList) {
+            log.info("*** retrieved products: {}", product);
         }
     }
-//
-//    @Test
-//    void givenProductsExist_whenFindByAnUnknownCategory_thenProductCountIsZero() {
-//        addProducts(2);
-//        Flux<Product> books = productService.findByCategory("unknown");
-//        assertEquals(0, books.count().block());
-//    }
-//
+
+    @Test
+    void givenProductsExist_whenFindByCategoryWithPagination_thenOutputIsASubListWithCorrectOrder() {
+        // other products
+        addProducts(1, PRODUCT_CATEGORY_1);
+        addProducts(1, PRODUCT_CATEGORY_2);
+
+        // products of the target category
+        List<Product> existingProducts = asList(
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 1D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 2D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 3D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 4D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 5D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 6D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 7D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 8D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 9D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 10D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 11D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 12D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 13D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 14D),
+                addProduct(DEFAULT_PRODUCT_CATEGORY, 15D)
+                );
+
+        List<Product> sortedProducts = existingProducts.stream().sorted(Comparator.comparingDouble(Product::getPrice).reversed()).collect(toList());
+        List<Product> expectedProducts = sortedProducts.subList(5, 10);
+
+        Flux<Product> output = productService.findByCategory(DEFAULT_PRODUCT_CATEGORY, "price", Sort.Direction.DESC, 1, 5);
+
+        List<Product> outputList = output.collectList().block();
+        assertThat(outputList.equals(expectedProducts)).isTrue();
+    }
+
+    @Test
+    void givenProductsExist_whenFindByQuerystring_thenOutputWithCorrectCount() {
+        // GIVEN
+        // other products
+        addProducts(1, PRODUCT_CATEGORY_1);
+        addProducts(1, PRODUCT_CATEGORY_2);
+        addProducts(1, PRODUCT_CATEGORY_1_1);
+        addProducts(1, PRODUCT_CATEGORY_2_1);
+
+        // products with keyword "Default"
+        addProducts(1, DEFAULT_PRODUCT_CATEGORY);
+        addProducts(1, PRODUCT_CATEGORY_2_1 + " default");
+        addProduct("unknown", "unknown", "default brand");
+        addProduct(DEFAULT_PRODUCT_NAME, PRODUCT_CATEGORY_1_1);
+        addProduct(DEFAULT_PRODUCT_NAME, PRODUCT_CATEGORY_2_1);
+
+        // WHEN
+        Flux<Product> output = productService.findByQueryString("Default", 0, 50);
+
+        // THEN
+        List<Product> outputList = output.collectList().block();
+        assertThat(outputList).hasSize(5);
+    }
+
+    @Test
+    void givenProductsExist_whenFindRelevantProducts_thenOutputWithCorrectCount() {
+        // GIVEN
+        // other products
+        addProducts(1, PRODUCT_CATEGORY_1);
+        addProducts(1, PRODUCT_CATEGORY_2);
+        addProducts(1, PRODUCT_CATEGORY_1_1);
+        addProducts(1, PRODUCT_CATEGORY_2_1);
+        addProducts(1, PRODUCT_CATEGORY_2_1 + " default");
+        addProduct("unknown", "unknown", "default brand");
+
+        // products with keyword "default" in product name or prefix in category
+        addProduct(DEFAULT_PRODUCT_NAME, "Drinks / " + PRODUCT_CATEGORY_1_1);
+        addProduct(DEFAULT_PRODUCT_NAME, "drinks / " + PRODUCT_CATEGORY_2_1);
+        addProduct("default xxxssdd 2334", "drinks / " + PRODUCT_CATEGORY_2_1);
+        addProduct("dd33sxxs default dsdf 2334", "drinks / " + PRODUCT_CATEGORY_2_1);
+        addProduct("dd33sxxs default", "drinks / " + PRODUCT_CATEGORY_2_1);
+
+        // WHEN
+        Flux<Product> output = productService.findRelevantProducts("Default", "drinks", null, null,0, 50);
+
+        // THEN
+        List<Product> outputList = output.collectList().block();
+        assertThat(outputList).hasSize(5);
+    }
+
+    @Test
+    void givenProductsExist_whenFindByAnUnknownCategory_thenProductCountIsZero() {
+        addProducts(2);
+        Flux<Product> products = productService.findByCategory("unknown", 0, 50);
+        assertEquals(0, products.count().block());
+    }
+
     private List<Product> addProducts(int productCount) {
         return addProducts(productCount, DEFAULT_PRODUCT_CATEGORY);
     }
 
     private List<Product> addProducts(int productCount, String category) {
         return IntStream.range(0, productCount)
-                .mapToObj(i -> addProduct(faker.name().name(), category))
+                .mapToObj(i -> addProduct(faker.name().name(), category, faker.company().name(), faker.number().randomDouble(2, 1, 5)))
                 .collect(toList());
     }
 
+    private Product addProduct(String category, Double price) {
+        return addProduct(faker.name().name(), category, faker.company().name(), price);
+    }
+
     private Product addProduct(String name, String category) {
+        return addProduct(name, category, faker.company().name(), faker.number().randomDouble(2, 1, 5));
+    }
+
+    private Product addProduct(String name, String category, String brand) {
+        return addProduct(name, category, brand, faker.number().randomDouble(2, 1, 5));
+    }
+
+
+    private Product addProduct(String name, String category, String brand, Double price) {
         Product product = Product.builder()
                 .id(UUID.randomUUID().toString())
                 .name(name)
                 .category(category)
-                .brand(faker.company().name())
+                .brand(brand)
                 .inStock(true)
-                .price(faker.number().randomDouble(2, 1, 5))
+                .price(price)
                 .build();
         return productService.save(product).block();
     }
