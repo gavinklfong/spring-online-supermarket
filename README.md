@@ -9,7 +9,7 @@ There are 3 API endpoints for product queries:
 * **Search products by keyword** - `GET /products/by-keyword?keyword=<keyword>`
 * **Search relevant products** - `GET /products/{productId}/relevant-products`
 
-![Use Case Diagram](https://github.com/gavinklfong/spring-online-supermarket/blob/main/blob/Use_Case.png?raw=true)
+![Use Case Diagram](https://github.com/gavinklfong/spring-online-supermarket/blob/master/blob/Use_Case.png?raw=true)
 
 ## System Overview
 
@@ -17,7 +17,7 @@ The system structure is based on the typical `Controller-Service-Repository` des
 
 Repository makes use of `ReactiveElasticsearchTemplate` for the access to Elasticsearch
 
-![Application Component Diagram](https://github.com/gavinklfong/spring-online-supermarket/blob/main/blob/System_Overivew.png?raw=true)
+![Application Component Diagram](https://github.com/gavinklfong/spring-online-supermarket/blob/master/blob/System_Overview.png?raw=true)
 
 ## Dependency
 
