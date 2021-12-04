@@ -19,6 +19,10 @@ Repository makes use of `ReactiveElasticsearchTemplate` for the access to Elasti
 
 ![Application Component Diagram](https://github.com/gavinklfong/spring-online-supermarket/blob/main/blob/System_Overivew.png?raw=true)
 
+## Dependency
+
+Docker environment is required as disposable Elasticsearch docker container is created during the automated test execution.
+
 ## Elasticsearch Docker Container
 
 This application needs to connect to Elasticsearch. Run this command to start up Elasticsearch in docker container:
