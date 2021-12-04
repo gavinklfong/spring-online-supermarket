@@ -7,9 +7,6 @@ logging:
 debug: true
 
 spring:
-  elasticsearch:
-    rest:
-      uris: http://localhost:9200
   data:
     elasticsearch:
       client:

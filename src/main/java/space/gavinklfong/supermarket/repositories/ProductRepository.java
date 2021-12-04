@@ -55,18 +55,6 @@ public class ProductRepository {
 
         Query query = queryBuilder.build();
 
-//        Query query = new StringQuery(format("{" +
-//                "        \"match\": { " +
-//                "            \"category\": {" +
-//                "                \"query\": \"%s\"" +
-//                "            }" +
-//                "        }" +
-//                "    }", category));
-
-//        Criteria criteria = new Criteria("category").contains(category);
-//        Query query = new CriteriaQuery(criteria);
-
-
         return elasticsearchOperations.searchForPage(query, Product.class)
                 .map(mapToProductSearchResult());
     }

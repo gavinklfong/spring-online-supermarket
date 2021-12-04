@@ -2,9 +2,9 @@ package space.gavinklfong.supermarket;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.elasticsearch.repository.config.EnableReactiveElasticsearchRepositories;
+//import org.springframework.data.elasticsearch.repository.config.EnableReactiveElasticsearchRepositories;
 
-@EnableReactiveElasticsearchRepositories
+//@EnableReactiveElasticsearchRepositories
 @SpringBootApplication
 public class SupermarketApplication {
 

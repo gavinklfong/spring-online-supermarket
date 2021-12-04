@@ -7,7 +7,7 @@ import space.gavinklfong.supermarket.SupermarketApplication;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(
-//        initializers = { ComponentTestContextInitializer.class },
+        initializers = { ComponentTestContextInitializer.class },
         classes = {SupermarketApplication.class, ComponentTestContextConfig.class}
 )
 @ActiveProfiles(profiles={"component-test"})

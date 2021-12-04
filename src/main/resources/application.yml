@@ -4,14 +4,9 @@ logging:
     space:
       gavinklfong: DEBUG
 
-debug: true
-
 spring:
-#  elasticsearch:
-#    rest:
-#      uris: https://localhost:9200
-#  data:
-#    elasticsearch:
-#      client:
-#        reactive:
-#          endpoints: http://localhost:9200
+  data:
+    elasticsearch:
+      client:
+        reactive:
+          endpoints: http://localhost:9200
