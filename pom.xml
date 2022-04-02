@@ -12,14 +12,19 @@
 	<artifactId>elasticsearch</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>elasticsearch</name>
-	<description>Demo project for Spring Data Elasticsearch</description>
+	<description>Demo project for Spring Data</description>
 	<properties>
 		<java.version>11</java.version>
+		<org.testcontainers.version>1.16.3</org.testcontainers.version>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-cassandra-reactive</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -51,6 +56,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.vaadin.external.google</groupId>
+					<artifactId>android-json</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.projectreactor</groupId>
@@ -60,19 +71,25 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers</artifactId>
-			<version>1.15.3</version>
+			<version>${org.testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>elasticsearch</artifactId>
-			<version>1.15.3</version>
+			<version>${org.testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>cassandra</artifactId>
+			<version>${org.testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
-			<version>1.15.3</version>
+			<version>${org.testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

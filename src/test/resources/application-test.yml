@@ -1,0 +1,9 @@
+spring:
+  data:
+    cassandra:
+      local-datacenter: datacenter1
+      schema-action: create_if_not_exists
+
+logging:
+  level:
+    root: INFO

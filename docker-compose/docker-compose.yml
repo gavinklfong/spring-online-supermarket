@@ -1,12 +1,42 @@
 services:
-  elasticsearch:
-    image: elasticsearch:7.14.2
+#  elasticsearch:
+#    image: elasticsearch:7.14.2
+#    ports:
+#      - "9200:9200"
+#    environment:
+#      discovery.type: single-node
+#    volumes:
+#      - ./elasticsearch-data:/usr/share/elasticsearch/data
+  cassandra:
+    container_name: cassandra
+    image: cassandra
     ports:
-      - "9200:9200"
-    environment:
-      discovery.type: single-node
+      - "9042:9042"
     volumes:
-      - ./elasticsearch-data:/usr/share/elasticsearch/data
+      - ./cassandra-data:/var/lib/cassandra
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "cqlsh",
+          "-u cassandra",
+          "-p cassandra",
+          "-e describe keyspaces"
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+  cassandra-load-keyspace:
+    container_name: cassandra-load-keyspace
+    image: cassandra
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./cassandra-schema/tables.cql:/tables.cql
+    command: /bin/bash -c "echo loading cassandra keyspace && cqlsh cassandra -f /tables.cql"
+
+
 #  kibana:
 #    depends_on:
 #      - elasticsearch
@@ -23,3 +53,8 @@ services:
 #     volumes:
 #       - ./logstash-pipeline:/usr/share/logstash/pipeline
 #       - ./logstash-data/products.json:/usr/share/logstash/data/products.json
+
+networks:
+  default:
+    external:
+      name: cassandra-network
