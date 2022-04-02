@@ -12,8 +12,8 @@ services:
     image: cassandra
     ports:
       - "9042:9042"
-    volumes:
-      - ./cassandra-data:/var/lib/cassandra
+#    volumes:
+#      - ./cassandra-data:/var/lib/cassandra
     healthcheck:
       test:
         [
