@@ -13,6 +13,7 @@ import org.testcontainers.containers.CassandraContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
+import space.gavinklfong.supermarket.models.Address;
 import space.gavinklfong.supermarket.models.Customer;
 
 import java.util.UUID;
@@ -56,6 +57,9 @@ public class CustomerRepositoryTest {
         Customer customer = customerMono.block();
         assertThat(customer).isNotNull();
         assertThat(customer.getCustomerId()).isEqualTo(UUID.fromString(CUSTOMER_ID));
+        assertThat(customer.getAddresses()).containsKey("home");
+        Address address = customer.getAddresses().get("home");
+        log.info("customer home address: {}", address);
     }
 
     @Test

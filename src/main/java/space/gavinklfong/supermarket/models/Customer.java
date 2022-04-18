@@ -11,7 +11,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 import java.util.Map;
 import java.util.UUID;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table("customer")
@@ -25,5 +25,5 @@ public class Customer {
     String email;
 
     @Frozen
-    Map<String, String> addresses;
+    Map<String, Address> addresses;
 }

@@ -2,6 +2,7 @@ package space.gavinklfong.supermarket.repositories;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -15,11 +16,15 @@ import reactor.core.publisher.Mono;
 import space.gavinklfong.supermarket.models.Customer;
 import space.gavinklfong.supermarket.models.DeliveryTimeslot;
 import space.gavinklfong.supermarket.models.DeliveryTimeslotKey;
+import space.gavinklfong.supermarket.utils.CommonUtils;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,17 +61,28 @@ public class DeliveryTimeslotRepositoryTest {
     @Test
     void testSave() {
         DeliveryTimeslotKey key = DeliveryTimeslotKey.builder()
-                .deliveryDate(LocalDate.of(2022, 02, 15))
+                .deliveryDate(LocalDate.of(2022, 01, 01))
                 .startTime(LocalTime.of(9, 0))
                 .deliveryTeamId(1)
                 .build();
 
         DeliveryTimeslot timeslot = DeliveryTimeslot.builder()
+                .key(key)
                 .reservedByCustomerId(UUID.randomUUID())
-                .status(DeliveryTimeslot.Status.AVAILABLE)
+                .reservationExpiry(Instant.now().plus(10, ChronoUnit.MINUTES))
+                .orderId(CommonUtils.emptyUUID())
                 .build();
 
         Mono<DeliveryTimeslot> savedMono = deliveryTimeslotRepository.save(timeslot);
+
+        // wait for save
+        savedMono.block();
+
+        Mono<DeliveryTimeslot> deliveryTimeslotMono = deliveryTimeslotRepository.findById(key);
+        assertThat(deliveryTimeslotMono).isNotNull();
+        DeliveryTimeslot deliveryTimeslot = deliveryTimeslotMono.block();
+        assertThat(deliveryTimeslot).isNotNull();
+        assertThat(deliveryTimeslot.getStatus()).isEqualTo(DeliveryTimeslot.Status.RESERVED);
     }
 
     @Test
