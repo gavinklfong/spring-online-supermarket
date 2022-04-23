@@ -5,23 +5,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
-import org.springframework.data.cassandra.core.mapping.Column;
+import org.springframework.data.cassandra.core.mapping.PrimaryKeyClass;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
-import org.springframework.data.cassandra.core.mapping.Table;
 
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table("order_by_customer")
-public class OrderByCustomer {
+@PrimaryKeyClass
+public class CustomerAddressKey {
     @PrimaryKeyColumn(name = "customer_id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
     UUID customerId;
-    @PrimaryKeyColumn(name = "order_id", ordinal = 0, type = PrimaryKeyType.CLUSTERED)
-    UUID orderId;
-    @Column("delivery_address_key")
-    String deliveryAddressKey;
-    Map<UUID, Integer> products;
+
+    @PrimaryKeyColumn(name = "address_key", ordinal = 1, type = PrimaryKeyType.CLUSTERED)
+    String addressKey;
 }

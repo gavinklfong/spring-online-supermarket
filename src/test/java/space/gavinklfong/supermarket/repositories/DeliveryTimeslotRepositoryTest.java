@@ -29,34 +29,31 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-@SpringBootTest
-@Testcontainers
-@ActiveProfiles("test")
-public class DeliveryTimeslotRepositoryTest {
-
-    @Container
-    public static CassandraContainer container = new CassandraContainer("cassandra").withInitScript("cassandra_init.cql");
-
-    @DynamicPropertySource
-    static void dataSourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.cassandra.keyspace-name", () -> KEYSPACE);
-        registry.add("spring.data.cassandra.contact-points", () -> container.getContainerIpAddress());
-        registry.add("spring.data.cassandra.port", () -> container.getMappedPort(9042));
-    }
-
+public class DeliveryTimeslotRepositoryTest extends CassandraRepositoryBaseTest {
     @Autowired
     private DeliveryTimeslotRepository deliveryTimeslotRepository;
 
-    private static final String KEYSPACE = "supermarket";
     private static final String CUSTOMER_ID = "7febc928-a5d0-40d5-ad71-ef7ebe2f2fe3";
 
-//    @BeforeAll
-//    static void createKeyspace() {
-//        try (Session session = container.getCluster().connect()) {
-//            session.execute("CREATE KEYSPACE IF NOT EXISTS " + KEYSPACE + " WITH replication = " +
-//                    "{'class':'SimpleStrategy','replication_factor':'1'};");
-//        }
-//    }
+//    UPDATE delivery_timeslot
+//    SET reserved_by_customer_id = 55a873e9-3c07-42c7-b7cd-1025a7c7beca
+//    WHERE delivery_date = '2022-02-16' AND start_time = '12:00:00' AND delivery_team_id = 1
+//    IF reserved_by_customer_id = 00000000-0000-0000-0000-000000000000;
+//
+//    UPDATE delivery_timeslot
+//    SET reserved_by_customer_id = 55a873e9-3c07-42c7-b7cd-1025a7c7beca
+//    WHERE delivery_date = '2022-02-16' AND start_time = '12:00:00' AND delivery_team_id = 1
+//    IF reserved_by_customer_id != 00000000-0000-0000-0000-000000000000
+//    AND reservation_expiry < '2011-02-03 04:05+0000'
+//    AND order_id = 00000000-0000-0000-0000-000000000000;
+//
+//
+//    UPDATE delivery_timeslot
+//    SET reserved_by_customer_id = f531794d-3a6d-4f2f-89e0-c9452511cc82
+//    WHERE delivery_date = '2022-02-16' AND start_time = '12:00:00' AND delivery_team_id = 1
+//    IF reserved_by_customer_id != 00000000-0000-0000-0000-000000000000
+//    AND reservation_expiry < '2011-02-03 04:05+0000'
+//    AND order_id = 00000000-0000-0000-0000-000000000000;
 
     @Test
     void testSave() {
@@ -70,7 +67,7 @@ public class DeliveryTimeslotRepositoryTest {
                 .key(key)
                 .reservedByCustomerId(UUID.randomUUID())
                 .reservationExpiry(Instant.now().plus(10, ChronoUnit.MINUTES))
-                .orderId(CommonUtils.emptyUUID())
+                .orderId(CommonUtils.EMPTY_UUID)
                 .build();
 
         Mono<DeliveryTimeslot> savedMono = deliveryTimeslotRepository.save(timeslot);

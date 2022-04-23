@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.Frozen;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
@@ -21,9 +22,11 @@ public class Customer {
     UUID customerId;
 
     String name;
+
     String telephone;
+
     String email;
 
-    @Frozen
-    Map<String, Address> addresses;
+    @Column("default_address_key")
+    String defaultAddressKey;
 }

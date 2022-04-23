@@ -2,13 +2,12 @@
 CREATE KEYSPACE IF NOT EXISTS supermarket WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : '1' };
 
 -- Define Address user-defined type
-CREATE TYPE supermarket.address (
+CREATE TYPE supermarket.address_type (
 street_address text,
 city text,
 country text,
 zipcode text
 );
-
 
 -- Create customer table
 CREATE TABLE IF NOT EXISTS supermarket.customer (
@@ -16,9 +15,15 @@ customer_id uuid,
 name text,
 telephone text,
 email text,
-addresses frozen<map<text,address>>,
 default_address_key text,
 PRIMARY KEY (customer_id)
+);
+
+CREATE TABLE IF NOT EXISTS supermarket.customer_address (
+customer_id uuid,
+address_key text,
+address frozen<address_type>,
+PRIMARY KEY (customer_id, address_key)
 );
 
 -- Create shopping basket table
@@ -33,23 +38,44 @@ CREATE TABLE IF NOT EXISTS supermarket.delivery_timeslot (
 delivery_date date,
 start_time time,
 delivery_team_id int,
-status text,
 reserved_by_customer_id uuid,
+reservation_expiry timestamp,
+order_id uuid,
 PRIMARY KEY (delivery_date, start_time, delivery_team_id)
 );
 
 
 -- Insert sample customers
-INSERT INTO supermarket.customer (customer_id, name, telephone, email, addresses, default_address_key)
-VALUES (7febc928-a5d0-40d5-ad71-ef7ebe2f2fe3, 'Peter', '012345678912345', 'peter@gmail.com', {'home': {street_address: '1059 Ardella Center', city: 'Dundalk', country: 'Dominican Republic', zipcode: '47368'}}, 'home');
+INSERT INTO supermarket.customer (customer_id, name, telephone, email, default_address_key)
+VALUES (28a76352-0102-45ae-81c7-aeb25cc228f9, 'John', '012345678912345', 'john@gmail.com', 'HOME');
+INSERT INTO supermarket.customer_address (customer_id, address_key, address)
+VALUES (28a76352-0102-45ae-81c7-aeb25cc228f9, 'HOME', {street_address: '2284 Lenna Lodge', city: 'Longmont', country: 'Belgium', zipcode: '05874'});
+INSERT INTO supermarket.customer_address (customer_id, address_key, address)
+VALUES (28a76352-0102-45ae-81c7-aeb25cc228f9, 'OFFICE', {street_address: '700 Hintz Causeway', city: 'Escondido', country: 'Belgium', zipcode: '70540'});
 
--- INSERT INTO supermarket.customer (customer_id, name, telephone, email, addresses, default_address_key)
--- VALUES (28a76352-0102-45ae-81c7-aeb25cc228f9, 'John', '012345678912345', 'john@gmail.com', {'home': 'address 1', 'office': 'address 2'}, 'home');
+INSERT INTO supermarket.customer (customer_id, name, telephone, email, default_address_key)
+VALUES (7febc928-a5d0-40d5-ad71-ef7ebe2f2fe3, 'Peter', '012345678912345', 'peter@gmail.com','HOME');
+INSERT INTO supermarket.customer_address (customer_id, address_key, address)
+VALUES (7febc928-a5d0-40d5-ad71-ef7ebe2f2fe3, 'HOME', {street_address: '1059 Ardella Center', city: 'Dundalk', country: 'Dominican Republic', zipcode: '47368'});
 
 -- Insert sample basket record
 INSERT INTO supermarket.shopping_basket (customer_id, products)
 VALUES (7febc928-a5d0-40d5-ad71-ef7ebe2f2fe3, {54641f90-e6a0-49f9-8d32-eb526e914779: 2, 8586dfc3-a049-41a9-a6f9-9cbbdf9e185a: 1});
 
 -- Insert sample delivery timeslot
-INSERT INTO supermarket.delivery_timeslot (delivery_date, start_time, delivery_team_id, status, reserved_by_customer_id)
-VALUES ('2022-02-15', '09:00:00', 1, 'AVAILABLE', 7febc928-a5d0-40d5-ad71-ef7ebe2f2fe3);
+INSERT INTO supermarket.delivery_timeslot (delivery_date, start_time, delivery_team_id, reserved_by_customer_id, reservation_expiry, order_id)
+VALUES ('2022-02-15', '09:00:00', 1, 00000000-0000-0000-0000-000000000000, '1970-01-01T00:00:00.001+0000', 00000000-0000-0000-0000-000000000000);
+INSERT INTO supermarket.delivery_timeslot (delivery_date, start_time, delivery_team_id, reserved_by_customer_id, reservation_expiry, order_id)
+VALUES ('2022-02-15', '09:00:00', 2, 00000000-0000-0000-0000-000000000000, '1970-01-01T00:00:00.001+0000', 00000000-0000-0000-0000-000000000000);
+INSERT INTO supermarket.delivery_timeslot (delivery_date, start_time, delivery_team_id, reserved_by_customer_id, reservation_expiry, order_id)
+VALUES ('2022-02-15', '12:00:00', 1, 00000000-0000-0000-0000-000000000000, '1970-01-01T00:00:00.001+0000', 00000000-0000-0000-0000-000000000000);
+INSERT INTO supermarket.delivery_timeslot (delivery_date, start_time, delivery_team_id, reserved_by_customer_id, reservation_expiry, order_id)
+VALUES ('2022-02-15', '12:00:00', 2, 00000000-0000-0000-0000-000000000000, '1970-01-01T00:00:00.001+0000', 00000000-0000-0000-0000-000000000000);
+INSERT INTO supermarket.delivery_timeslot (delivery_date, start_time, delivery_team_id, reserved_by_customer_id, reservation_expiry, order_id)
+VALUES ('2022-02-16', '12:00:00', 1, 00000000-0000-0000-0000-000000000000, '1970-01-01T00:00:00.001+0000', 00000000-0000-0000-0000-000000000000);
+INSERT INTO supermarket.delivery_timeslot (delivery_date, start_time, delivery_team_id, reserved_by_customer_id, reservation_expiry, order_id)
+VALUES ('2022-02-16', '12:00:00', 2, 00000000-0000-0000-0000-000000000000, '1970-01-01T00:00:00.001+0000', 00000000-0000-0000-0000-000000000000);
+INSERT INTO supermarket.delivery_timeslot (delivery_date, start_time, delivery_team_id, reserved_by_customer_id, reservation_expiry, order_id)
+VALUES ('2022-02-16', '16:00:00', 1, 00000000-0000-0000-0000-000000000000, '1970-01-01T00:00:00.001+0000', 00000000-0000-0000-0000-000000000000);
+INSERT INTO supermarket.delivery_timeslot (delivery_date, start_time, delivery_team_id, reserved_by_customer_id, reservation_expiry, order_id)
+VALUES ('2022-02-16', '16:00:00', 2, 00000000-0000-0000-0000-000000000000, '1970-01-01T00:00:00.001+0000', 00000000-0000-0000-0000-000000000000);

@@ -33,6 +33,10 @@ public class CustomerService {
 //                );
 //    }
 
+    public Mono<Customer> saveCustomer(Customer customer) {
+        return customerRepository.save(customer);
+    }
+
     public Mono<Customer> findByCustomerId(UUID customerId) {
         return customerRepository.findById(customerId);
     }

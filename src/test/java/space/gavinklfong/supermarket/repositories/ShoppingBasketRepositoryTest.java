@@ -20,34 +20,12 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-@SpringBootTest
-@Testcontainers
-@ActiveProfiles("test")
-public class ShoppingBasketRepositoryTest {
+public class ShoppingBasketRepositoryTest extends CassandraRepositoryBaseTest {
 
-    @Container
-    public static CassandraContainer container = new CassandraContainer("cassandra").withInitScript("cassandra_init.cql");
-
-    @DynamicPropertySource
-    static void dataSourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.cassandra.keyspace-name", () -> KEYSPACE);
-        registry.add("spring.data.cassandra.contact-points", () -> container.getContainerIpAddress());
-        registry.add("spring.data.cassandra.port", () -> container.getMappedPort(9042));
-    }
 
     @Autowired
     private ShoppingBasketRepository shoppingBasketRepository;
-
-    private static final String KEYSPACE = "supermarket";
     private static final String CUSTOMER_ID = "7febc928-a5d0-40d5-ad71-ef7ebe2f2fe3";
-
-//    @BeforeAll
-//    static void createKeyspace() {
-//        try (Session session = container.getCluster().connect()) {
-//            session.execute("CREATE KEYSPACE IF NOT EXISTS " + KEYSPACE + " WITH replication = " +
-//                    "{'class':'SimpleStrategy','replication_factor':'1'};");
-//        }
-//    }
 
     @Test
     void givenBasketRecord_whenFindByCustomerId_thenReturnBasket() {

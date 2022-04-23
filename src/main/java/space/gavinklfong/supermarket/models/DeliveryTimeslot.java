@@ -38,7 +38,7 @@ public class DeliveryTimeslot {
     UUID orderId;
 
     public Status getStatus() {
-        if (nonNull(orderId) && !orderId.equals(CommonUtils.emptyUUID())) return Status.CONFIRMED;
+        if (nonNull(orderId) && !orderId.equals(CommonUtils.EMPTY_UUID)) return Status.CONFIRMED;
 
         if (nonNull(reservationExpiry) && reservationExpiry.isAfter(Instant.now())) {
             return Status.RESERVED;

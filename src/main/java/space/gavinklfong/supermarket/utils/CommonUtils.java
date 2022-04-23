@@ -8,8 +8,6 @@ import java.util.UUID;
 public class CommonUtils {
 
     static public final String EMPTY_UUID_STRING = "00000000-0000-0000-0000-000000000000";
-
-    public UUID emptyUUID() {
-        return UUID.fromString(EMPTY_UUID_STRING);
-    }
+    static public final UUID EMPTY_UUID = UUID.fromString(EMPTY_UUID_STRING);
 }
+
