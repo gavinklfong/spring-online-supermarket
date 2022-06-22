@@ -22,7 +22,7 @@ import static java.util.Objects.nonNull;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table("delivery_timeslot")
+@Table("delivery_timeslots")
 public class DeliveryTimeslot {
 
     @PrimaryKey
@@ -34,11 +34,11 @@ public class DeliveryTimeslot {
     @Column("reservation_expiry")
     Instant reservationExpiry;
 
-    @Column("order_id")
-    UUID orderId;
+    @Column("confirmed")
+    Boolean confirmed;
 
     public Status getStatus() {
-        if (nonNull(orderId) && !orderId.equals(CommonUtils.EMPTY_UUID)) return Status.CONFIRMED;
+        if (nonNull(confirmed) && confirmed.booleanValue()) return Status.CONFIRMED;
 
         if (nonNull(reservationExpiry) && reservationExpiry.isAfter(Instant.now())) {
             return Status.RESERVED;

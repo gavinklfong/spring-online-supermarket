@@ -15,11 +15,11 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table("customer")
+@Table("customers")
 public class Customer {
 
-    @PrimaryKey("customer_id")
-    UUID customerId;
+    @PrimaryKey("id")
+    UUID id;
 
     String name;
 

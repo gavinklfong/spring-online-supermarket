@@ -27,6 +27,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static space.gavinklfong.supermarket.repositories.TestConstants.DELIVERY_TEAM_ID;
 
 @Slf4j
 public class DeliveryTimeslotRepositoryTest extends CassandraRepositoryBaseTest {
@@ -60,14 +61,14 @@ public class DeliveryTimeslotRepositoryTest extends CassandraRepositoryBaseTest 
         DeliveryTimeslotKey key = DeliveryTimeslotKey.builder()
                 .deliveryDate(LocalDate.of(2022, 01, 01))
                 .startTime(LocalTime.of(9, 0))
-                .deliveryTeamId(1)
+                .deliveryTeamId(DELIVERY_TEAM_ID)
                 .build();
 
         DeliveryTimeslot timeslot = DeliveryTimeslot.builder()
                 .key(key)
                 .reservedByCustomerId(UUID.randomUUID())
                 .reservationExpiry(Instant.now().plus(10, ChronoUnit.MINUTES))
-                .orderId(CommonUtils.EMPTY_UUID)
+                .confirmed(false)
                 .build();
 
         Mono<DeliveryTimeslot> savedMono = deliveryTimeslotRepository.save(timeslot);
@@ -87,7 +88,7 @@ public class DeliveryTimeslotRepositoryTest extends CassandraRepositoryBaseTest 
         DeliveryTimeslotKey key = DeliveryTimeslotKey.builder()
                 .deliveryDate(LocalDate.of(2022, 02, 15))
                 .startTime(LocalTime.of(9, 0))
-                .deliveryTeamId(1)
+                .deliveryTeamId(DELIVERY_TEAM_ID)
                 .build();
 
         Mono<DeliveryTimeslot> timeslotMono = deliveryTimeslotRepository.findById(key);

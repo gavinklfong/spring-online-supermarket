@@ -13,7 +13,7 @@ import java.util.UUID;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table("shopping_basket")
+@Table("shopping_basket_by_customer")
 public class ShoppingBasket {
     @PrimaryKey("customer_id")
     UUID customerId;

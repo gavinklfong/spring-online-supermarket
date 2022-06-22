@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 public class CustomerRepositoryTest extends CassandraRepositoryBaseTest {
-
     @Autowired
     private CustomerRepository customerRepository;
     private static final String CUSTOMER_ID = "7febc928-a5d0-40d5-ad71-ef7ebe2f2fe3";
@@ -31,7 +30,7 @@ public class CustomerRepositoryTest extends CassandraRepositoryBaseTest {
         assertThat(customerMono).isNotNull();
         Customer customer = customerMono.block();
         assertThat(customer).isNotNull();
-        assertThat(customer.getCustomerId()).isEqualTo(UUID.fromString(CUSTOMER_ID));
+        assertThat(customer.getId()).isEqualTo(UUID.fromString(CUSTOMER_ID));
 //        assertThat(customer.getAddresses()).containsKey("home");
 //        Address address = customer.getAddresses().get("home");
 //        log.info("customer home address: {}", address);

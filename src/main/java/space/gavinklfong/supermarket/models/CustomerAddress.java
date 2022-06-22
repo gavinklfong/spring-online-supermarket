@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table("customer_address")
+@Table("customer_addresses")
 public class CustomerAddress {
 
     @PrimaryKey

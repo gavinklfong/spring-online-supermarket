@@ -16,13 +16,11 @@ import java.util.UUID;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @PrimaryKeyClass
-public class DeliveryTimeslotKey {
+public class OrderByDeliveryDateKey {
     @PrimaryKeyColumn(name = "delivery_date", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
     LocalDate deliveryDate;
-
-    @PrimaryKeyColumn(name = "start_time", ordinal = 1, type = PrimaryKeyType.CLUSTERED)
-    LocalTime startTime;
-
-    @PrimaryKeyColumn(name = "delivery_team_id", ordinal = 2, type = PrimaryKeyType.CLUSTERED)
+    @PrimaryKeyColumn(name = "delivery_team_id", ordinal = 1, type = PrimaryKeyType.PARTITIONED)
     UUID deliveryTeamId;
+    @PrimaryKeyColumn(name = "start_time", ordinal = 2, type = PrimaryKeyType.CLUSTERED)
+    LocalTime startTime;
 }
