@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.cassandra.core.ReactiveCassandraOperations;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -13,9 +15,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import space.gavinklfong.supermarket.models.Customer;
 import space.gavinklfong.supermarket.models.DeliveryTimeslot;
 import space.gavinklfong.supermarket.models.DeliveryTimeslotKey;
+import space.gavinklfong.supermarket.services.DateTimeProvider;
 import space.gavinklfong.supermarket.utils.CommonUtils;
 
 import java.time.Instant;
@@ -27,14 +31,22 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 import static space.gavinklfong.supermarket.repositories.TestConstants.DELIVERY_TEAM_ID;
+import static space.gavinklfong.supermarket.utils.CommonUtils.EMPTY_UUID;
 
 @Slf4j
 public class DeliveryTimeslotRepositoryTest extends CassandraRepositoryBaseTest {
     @Autowired
     private DeliveryTimeslotRepository deliveryTimeslotRepository;
 
-    private static final String CUSTOMER_ID = "7febc928-a5d0-40d5-ad71-ef7ebe2f2fe3";
+    @Autowired
+    private ReactiveCassandraOperations cassandraOperations;
+
+    @MockBean
+    private DateTimeProvider dateTimeProvider;
+
+    private static final UUID CUSTOMER_ID = UUID.fromString("7febc928-a5d0-40d5-ad71-ef7ebe2f2fe3");
 
 //    UPDATE delivery_timeslot
 //    SET reserved_by_customer_id = 55a873e9-3c07-42c7-b7cd-1025a7c7beca
@@ -107,6 +119,85 @@ public class DeliveryTimeslotRepositoryTest extends CassandraRepositoryBaseTest 
         assertThat(timeslotFlux).isNotNull();
         List<DeliveryTimeslot> timeslots = timeslotFlux.collectList().block();
         assertThat(timeslots).isNotNull().hasSize(4);
+    }
+
+    @Test
+    void givenTimeslotWithEmptyReservedCustomerId_whenReserve_thenUpdatedSuccess() {
+        DeliveryTimeslotKey key = DeliveryTimeslotKey.builder()
+                .deliveryDate(LocalDate.of(2022, 2,10))
+                .deliveryTeamId(UUID.randomUUID())
+                .startTime(LocalTime.of(14, 0, 0))
+                .build();
+
+        DeliveryTimeslot deliveryTimeslot = DeliveryTimeslot.builder()
+                .key(key)
+                .reservedByCustomerId(EMPTY_UUID)
+                .reservationExpiry(Instant.now())
+                .confirmed(false)
+                .build();
+
+        cassandraOperations.insert(deliveryTimeslot).block();
+
+        Instant expiryTime = Instant.now().plus(10, ChronoUnit.MINUTES);
+        Mono<Boolean> updateStatus = deliveryTimeslotRepository.updateReservedCustomer(key, CUSTOMER_ID, expiryTime);
+
+        StepVerifier.create(updateStatus)
+                .expectNext(true)
+                .verifyComplete();
+    }
+
+    @Test
+    void givenTimeslotWithReservedCustomerIdAndNotExpired_whenReserve_thenUpdateFail() {
+        DeliveryTimeslotKey key = DeliveryTimeslotKey.builder()
+                .deliveryDate(LocalDate.of(2022, 2,10))
+                .deliveryTeamId(UUID.randomUUID())
+                .startTime(LocalTime.of(14, 0, 0))
+                .build();
+
+        DeliveryTimeslot deliveryTimeslot = DeliveryTimeslot.builder()
+                .key(key)
+                .reservedByCustomerId(UUID.randomUUID())
+                .reservationExpiry(Instant.now().plus(30, ChronoUnit.MINUTES))
+                .confirmed(false)
+                .build();
+
+        cassandraOperations.insert(deliveryTimeslot).block();
+
+        when(dateTimeProvider.now()).thenReturn(Instant.now());
+
+        Instant expiryTime = Instant.now().plus(10, ChronoUnit.MINUTES);
+        Mono<Boolean> updateStatus = deliveryTimeslotRepository.updateReservedCustomer(key, CUSTOMER_ID, expiryTime);
+
+        StepVerifier.create(updateStatus)
+                .expectNext(false)
+                .verifyComplete();
+    }
+
+    @Test
+    void givenTimeslotWithReservedCustomerIdAndAlreadyExpired_whenReserve_thenUpdateSuccess() {
+        DeliveryTimeslotKey key = DeliveryTimeslotKey.builder()
+                .deliveryDate(LocalDate.of(2022, 2,10))
+                .deliveryTeamId(UUID.randomUUID())
+                .startTime(LocalTime.of(14, 0, 0))
+                .build();
+
+        DeliveryTimeslot deliveryTimeslot = DeliveryTimeslot.builder()
+                .key(key)
+                .reservedByCustomerId(UUID.randomUUID())
+                .reservationExpiry(Instant.now().minus(30, ChronoUnit.MINUTES))
+                .confirmed(false)
+                .build();
+
+        cassandraOperations.insert(deliveryTimeslot).block();
+
+        when(dateTimeProvider.now()).thenReturn(Instant.now());
+
+        Instant expiryTime = Instant.now().plus(10, ChronoUnit.MINUTES);
+        Mono<Boolean> updateStatus = deliveryTimeslotRepository.updateReservedCustomer(key, CUSTOMER_ID, expiryTime);
+
+        StepVerifier.create(updateStatus)
+                .expectNext(true)
+                .verifyComplete();
     }
 
 }

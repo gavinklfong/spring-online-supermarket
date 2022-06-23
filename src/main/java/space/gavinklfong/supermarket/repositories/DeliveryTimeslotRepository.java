@@ -8,6 +8,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import space.gavinklfong.supermarket.models.DeliveryTimeslot;
 import space.gavinklfong.supermarket.models.DeliveryTimeslotKey;
+import space.gavinklfong.supermarket.services.DateTimeProvider;
 import space.gavinklfong.supermarket.utils.CommonUtils;
 
 import java.time.Instant;
@@ -22,6 +23,9 @@ public class DeliveryTimeslotRepository {
 
     @Autowired
     private ReactiveCassandraOperations cassandraOperations;
+
+    @Autowired
+    private DateTimeProvider dateTimeProvider;
 
     public Mono<DeliveryTimeslot> findById(DeliveryTimeslotKey key) {
         return cassandraOperations
@@ -66,7 +70,7 @@ public class DeliveryTimeslotRepository {
     private Mono<Boolean> updateIfReservationIsExpired(DeliveryTimeslot deliveryTimeslot) {
         return cassandraOperations.update(deliveryTimeslot,
                         UpdateOptions.builder().ifCondition(
-                                query(where("reserved_by_customer_id").is(CommonUtils.EMPTY_UUID))
+                                query(where("reservation_expiry").lt(dateTimeProvider.now()))
                         ).build())
                 .map(result -> result.wasApplied());
     }
