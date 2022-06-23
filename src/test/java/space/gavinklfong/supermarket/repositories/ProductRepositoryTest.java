@@ -6,21 +6,33 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.cassandra.CassandraReactiveDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.cassandra.CassandraReactiveRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.elasticsearch.ReactiveElasticsearchRepositoriesAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.MockBeans;
+import org.springframework.data.cassandra.core.ReactiveCassandraOperations;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
 import space.gavinklfong.supermarket.dtos.SearchResult;
 import space.gavinklfong.supermarket.models.Product;
+import space.gavinklfong.supermarket.services.ShoppingService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -36,6 +48,20 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
 @SpringBootTest
+//// There is no simple way to load slice of context for Elasticsearch repository,
+//// so exclude Cassandra repositories
+@EnableAutoConfiguration(exclude = {
+        CassandraAutoConfiguration.class, CassandraDataAutoConfiguration.class,
+        CassandraReactiveDataAutoConfiguration.class, CassandraReactiveRepositoriesAutoConfiguration.class
+})
+@MockBeans({
+        @MockBean(ShoppingService.class),
+        @MockBean(CustomerAddressRepository.class),
+        @MockBean(CustomerRepository.class),
+        @MockBean(DeliveryTimeslotRepository.class),
+        @MockBean(OrderByCustomerRepository.class),
+        @MockBean(OrderByDeliveryDateRepository.class)
+})
 @Testcontainers
 public class ProductRepositoryTest {
 
