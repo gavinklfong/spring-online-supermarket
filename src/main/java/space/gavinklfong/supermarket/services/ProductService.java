@@ -2,13 +2,10 @@ package space.gavinklfong.supermarket.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import space.gavinklfong.supermarket.dtos.SearchResult;
 import space.gavinklfong.supermarket.models.Product;
 import space.gavinklfong.supermarket.repositories.ProductRepository;
-
-import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;

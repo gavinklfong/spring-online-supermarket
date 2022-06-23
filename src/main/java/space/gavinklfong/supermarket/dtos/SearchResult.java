@@ -3,7 +3,6 @@ package space.gavinklfong.supermarket.dtos;
 import lombok.Builder;
 import lombok.Data;
 import lombok.With;
-import space.gavinklfong.supermarket.models.Product;
 
 import java.util.List;
 

@@ -12,11 +12,7 @@ import space.gavinklfong.supermarket.models.CustomerAddressKey;
 import space.gavinklfong.supermarket.repositories.CustomerAddressRepository;
 import space.gavinklfong.supermarket.repositories.CustomerRepository;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-
-import static java.util.Objects.isNull;
 
 @Service
 public class CustomerService {

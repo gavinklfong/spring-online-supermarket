@@ -10,7 +10,6 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.core.mapping.Table;
 
 import java.time.Instant;
-import java.util.Currency;
 import java.util.Map;
 import java.util.UUID;
 

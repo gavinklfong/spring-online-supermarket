@@ -13,14 +13,10 @@ import space.gavinklfong.supermarket.repositories.ShoppingBasketRepository;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Hashtable;
-import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static space.gavinklfong.supermarket.utils.CommonUtils.EMPTY_UUID;
-import java.time.temporal.ChronoUnit;
 
 @Service
 public class ShoppingService {
