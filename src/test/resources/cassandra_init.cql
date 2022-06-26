@@ -9,6 +9,13 @@ country text,
 zipcode text
 );
 
+CREATE TYPE supermarket.reserved_delivery_timeslot_type (
+  delivery_date date,
+  start_time time,
+  delivery_team_id uuid,
+  reservation_expiry timestamp
+);
+
 -- Create customer table
 CREATE TABLE IF NOT EXISTS supermarket.customers (
 id uuid,
@@ -30,6 +37,7 @@ PRIMARY KEY (customer_id, address_key)
 CREATE TABLE IF NOT EXISTS supermarket.shopping_basket_by_customer (
 customer_id uuid,
 products frozen<map<uuid,int>>,
+reserved_delivery_timeslot frozen<reserved_delivery_timeslot_type>,
 PRIMARY KEY (customer_id)
 );
 
@@ -49,7 +57,7 @@ CREATE TABLE IF NOT EXISTS supermarket.orders_by_customer (
   customer_id uuid,
   order_id uuid,
   submission_time timestamp,
-  products map<uuid, int>,
+  products frozen<map<uuid, int>>,
   status text,
   delivery_address_key text,
   currency text,
@@ -70,7 +78,7 @@ CREATE TABLE IF NOT EXISTS supermarket.orders_by_delivery_date (
   customer_id uuid,
   delivery_address_key text,
   status text,
-  products map<uuid, int>,
+  products frozen<map<uuid, int>>,
   remarks text,
   PRIMARY KEY ((delivery_date, delivery_team_id), start_time)
 )

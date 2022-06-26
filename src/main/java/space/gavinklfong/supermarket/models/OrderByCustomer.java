@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
 import org.springframework.data.cassandra.core.mapping.Column;
+import org.springframework.data.cassandra.core.mapping.Frozen;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.core.mapping.Table;
 
@@ -26,6 +27,7 @@ public class OrderByCustomer {
     @PrimaryKeyColumn(name = "submission_time", ordinal = 2, type = PrimaryKeyType.CLUSTERED)
     Instant submissionTime;
 
+    @Frozen
     @Column("products")
     Map<UUID, Integer> products;
 
