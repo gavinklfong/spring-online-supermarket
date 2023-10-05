@@ -9,14 +9,15 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>space.gavinklfong</groupId>
-	<artifactId>elasticsearch</artifactId>
+	<artifactId>online-supermarket</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>elasticsearch</name>
-	<description>Demo project for Spring Data</description>
+	<name>online-supermarket</name>
+	<description>Demo project for Online Supermarket</description>
 	<properties>
 		<java.version>17</java.version>
 		<org.testcontainers.version>1.16.3</org.testcontainers.version>
 		<org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
+		<lombbok.version>1.18.28</lombbok.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -51,6 +52,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<version>${lombbok.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -122,22 +124,34 @@
 					</excludes>
 				</configuration>
 			</plugin>
-<!--			<plugin>-->
-<!--				<groupId>org.apache.maven.plugins</groupId>-->
-<!--				<artifactId>maven-compiler-plugin</artifactId>-->
-<!--				<version>3.8.1</version>-->
-<!--				<configuration>-->
-<!--					<source>11</source>-->
-<!--					<target>11</target>-->
-<!--					<annotationProcessorPaths>-->
-<!--						<path>-->
-<!--							<groupId>org.mapstruct</groupId>-->
-<!--							<artifactId>mapstruct-processor</artifactId>-->
-<!--							<version>${org.mapstruct.version}</version>-->
-<!--						</path>-->
-<!--					</annotationProcessorPaths>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>11</source>
+					<target>11</target>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${org.mapstruct.version}</version>
+						</path>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+
+						<!-- additional annotation processor required as of Lombok 1.18.16 -->
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok-mapstruct-binding</artifactId>
+							<version>0.2.0</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
