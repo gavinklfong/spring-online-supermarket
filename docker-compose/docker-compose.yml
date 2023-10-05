@@ -23,3 +23,14 @@ services:
 #     volumes:
 #       - ./logstash-pipeline:/usr/share/logstash/pipeline
 #       - ./logstash-data/products.json:/usr/share/logstash/data/products.json
+#  mysql:
+#    image: mysql
+#    command: --default-authentication-plugin=mysql_native_password
+#    environment:
+#      MYSQL_ROOT_PASSWORD: root
+#    ports:
+#      - "3306:3306"
+#    volumes:
+#      - "./mysql-scripts/schema.sql:/docker-entrypoint-initdb.d/1.sql"
+#      - "./mysql-scripts/data.sql:/docker-entrypoint-initdb.d/2.sql"
+
